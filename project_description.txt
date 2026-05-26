@@ -1,0 +1,108 @@
+E-Commerce MVP — Feature Document & Backend API Plan
+
+🎯 MVP Philosophy
+Build only what's needed to launch, sell, and operate. Cut everything that can wait for v2.
+
+✅ MVP Modules (6 Core Only)
+#ModuleWhy It's MVP Critical1AuthenticationEvery action depends on identity2Product & CategoryNothing to sell without this3CartCore shopping flow4Order ManagementComplete the purchase loop5PaymentRevenue — the whole point6Admin Panel (Basic)Manage products & orders
+
+❌ Deferred to v2: Wishlist, Reviews, Coupons, Notifications, Analytics, Social Login, Variants, Shipping config
+
+
+🔐 Module 1 — Authentication & Authorization
+
+Features
+
+Register with email + password
+Email verification (OTP or link)
+Login → returns JWT access token
+Refresh token for session continuity
+Forgot password / Reset password via email
+Role-based access: ADMIN, USER, GUEST
+Logout (invalidate token server-side)
+
+API List
+MethodEndpointAccessPurposePOST/api/auth/registerPublicRegister new userPOST/api/auth/verify-emailPublicVerify via OTP/tokenPOST/api/auth/loginPublicLogin, receive JWTPOST/api/auth/refresh-tokenPublicRenew access tokenPOST/api/auth/forgot-passwordPublicSend OTP to emailPOST/api/auth/reset-passwordPublicReset with OTP + new passwordPOST/api/auth/logoutUserInvalidate tokenGET/api/auth/meUserGet logged-in user info
+Total: 8 APIs
+
+🛍️ Module 2 — Product & Category Management
+Features
+
+Products have name, description, price, stock count, images, SKU
+Single category per product (no nested categories for MVP)
+Multiple images per product
+Product status: Active / Inactive
+Guest and user can browse & view products
+Admin creates, edits, deletes, and manages status
+Basic related products (same category)
+
+API List — Products
+MethodEndpointAccessPurposeGET/api/productsPublicList active products (paginated)GET/api/products/{id}PublicView product detailsGET/api/products/{id}/relatedPublicGet related productsPOST/api/admin/productsAdminCreate productPUT/api/admin/products/{id}AdminEdit productDELETE/api/admin/products/{id}AdminDelete productPUT/api/admin/products/{id}/statusAdminToggle active/inactivePOST/api/admin/products/{id}/imagesAdminUpload imagesDELETE/api/admin/products/{id}/images/{imgId}AdminRemove image
+API List — Categories
+MethodEndpointAccessPurposeGET/api/categoriesPublicList all categoriesGET/api/categories/{id}/productsPublicProducts under a categoryPOST/api/admin/categoriesAdminCreate categoryPUT/api/admin/categories/{id}AdminEdit categoryDELETE/api/admin/categories/{id}AdminDelete category
+Total: 14 APIs
+
+🛒 Module 3 — Cart Management
+Features
+
+Registered users — cart stored in DB, synced across devices
+Guest cart — handled on frontend (localStorage), merged on login
+Add to cart with stock validation
+Update item quantity
+Remove item
+Clear cart after order placed
+Show cart item count and total price
+
+API List
+MethodEndpointAccessPurposeGET/api/cartUserGet current user's cartPOST/api/cart/addUserAdd product to cartPUT/api/cart/update/{itemId}UserUpdate item quantityDELETE/api/cart/remove/{itemId}UserRemove itemDELETE/api/cart/clearUserClear entire cartPOST/api/cart/mergeUserMerge guest cart on login
+Total: 6 APIs
+
+📦 Module 4 — Order Management
+Features
+
+Place order from cart
+Save delivery address at order time (no address book for MVP)
+Order statuses: PENDING → CONFIRMED → SHIPPED → DELIVERED → CANCELLED
+User can cancel before SHIPPED
+Snapshot product price at time of purchase (price won't change with product edits)
+Admin views and updates order status
+User views own order history and detail
+
+API List — User
+MethodEndpointAccessPurposePOST/api/orders/placeUserPlace order from cartGET/api/ordersUserMy order historyGET/api/orders/{id}UserView order detailPUT/api/orders/{id}/cancelUserCancel order
+API List — Admin
+MethodEndpointAccessPurposeGET/api/admin/ordersAdminList all orders (filterable)GET/api/admin/orders/{id}AdminView order detailPUT/api/admin/orders/{id}/statusAdminUpdate order status
+Total: 7 APIs
+
+💳 Module 5 — Payment
+Features
+
+Razorpay integration (best for India / INR)
+Flow: Place Order → Initiate Payment → Gateway → Verify → Confirm Order
+Payment statuses: PENDING, SUCCESS, FAILED, REFUNDED
+Auto-confirm order on successful payment
+Basic refund trigger by admin on cancellation
+Payment webhook to handle async gateway callbacks
+
+API List
+MethodEndpointAccessPurposePOST/api/payments/initiateUserCreate Razorpay orderPOST/api/payments/verifyUserVerify signature after paymentGET/api/payments/{orderId}UserGet payment statusPOST/api/payments/webhookPublicRazorpay webhook handlerPOST/api/admin/payments/{orderId}/refundAdminTrigger refund
+Total: 5 APIs
+
+🖥️ Module 6 — Admin Panel (Basic)
+Features
+
+Admin-only dashboard with minimal stats
+Manage users (view, activate/deactivate)
+All product and order management (covered in Modules 2 & 4)
+Low stock alert view
+No complex analytics for MVP — just counts
+
+API List
+MethodEndpointAccessPurposeGET/api/admin/dashboard/summaryAdminTotal orders, revenue, users countGET/api/admin/dashboard/low-stockAdminProducts below stock thresholdGET/api/admin/usersAdminList all usersGET/api/admin/users/{id}AdminView user profilePUT/api/admin/users/{id}/statusAdminActivate / Deactivate user
+Total: 5 APIs
+
+📊 MVP API Summary
+ModuleAPI CountAuthentication8Products & Categories14Cart6Orders7Payments5Admin Panel5Total45 APIs
+
+🗄️ Core Database Tables (MVP Only)
+TableKey Columnsusersid, name, email, password, role, status, verifiedcategoriesid, name, description, imageproductsid, name, description, price, stock, sku, status, category_idproduct_imagesid, product_id, image_url, is_primarycartid, user_idcart_itemsid, cart_id, product_id, quantityordersid, user_id, status, total_amount, address_snapshot, created_atorder_itemsid, order_id, product_id, quantity, price_at_purchasepaymentsid, order_id, razorpay_order_id, status, amount, paid_atrefresh_tokensid, user_id, token, expiry
