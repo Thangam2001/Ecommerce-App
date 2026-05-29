@@ -3,7 +3,6 @@ package com.prabu.ecommerce.controller;
 import com.prabu.ecommerce.dto.requestdto.*;
 import com.prabu.ecommerce.dto.responsedto.RefreshTokenResponseDTO;
 import com.prabu.ecommerce.exception.AuthException;
-import com.prabu.ecommerce.model.User;
 import com.prabu.ecommerce.service.AuthService;
 import com.prabu.ecommerce.utils.JwtUtil;
 import jakarta.validation.Valid;
@@ -17,15 +16,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @Validated
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:5173")
 public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody User user){
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request){
         try{
-            User isRegistered=authService.registerUser(user);
+            var isRegistered=authService.registerUser(request);
             if(isRegistered != null){
                 return ResponseEntity.ok("Registration successful. OTP sent to "+isRegistered.getEmail());
             }else{

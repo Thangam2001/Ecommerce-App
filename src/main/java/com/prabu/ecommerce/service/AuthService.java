@@ -11,7 +11,7 @@ public interface AuthService {
 
     boolean verifyOtp(@Valid VerifyEmailRequestDTO otpDetails);
 
-    User registerUser(@Valid User user);
+    User registerUser(@Valid RegisterRequestDTO request);
 
     LoginResponseDTO login(@Valid LoginRequestDTO request);
 

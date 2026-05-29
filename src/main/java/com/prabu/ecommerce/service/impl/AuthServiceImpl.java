@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl implements AuthService, UserDetailsService {
     @Autowired
     private AuthRepository authRepository;
     @Autowired
@@ -40,10 +41,16 @@ public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public User registerUser(User user) {
-        if (authRepository.findByEmail(user.getEmail()).isPresent()) {
+    public User registerUser(RegisterRequestDTO request) {
+        if (authRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new AuthException("Email already exist");
         }
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .build();
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -136,6 +143,11 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) {
+        return loadUserByEmail(email);
     }
 
     @Override
