@@ -2,15 +2,11 @@ package com.prabu.ecommerce.service.impl;
 
 import com.prabu.ecommerce.dto.requestdto.*;
 import com.prabu.ecommerce.dto.responsedto.LoginResponseDTO;
-import com.prabu.ecommerce.dto.responsedto.RefreshTokenResponseDTO;
 import com.prabu.ecommerce.exception.AuthException;
-import com.prabu.ecommerce.model.RefreshToken;
 import com.prabu.ecommerce.model.User;
 import com.prabu.ecommerce.repository.AuthRepository;
-import com.prabu.ecommerce.repository.RefreshTokenRepository;
 import com.prabu.ecommerce.service.EmailService;
 import com.prabu.ecommerce.service.AuthService;
-import com.prabu.ecommerce.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,10 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -32,11 +26,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     @Autowired
     private AuthRepository authRepository;
     @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
-    @Autowired
     private EmailService emailService;
-    @Autowired
-    private JwtUtil jwtUtil;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -123,21 +113,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             throw new AuthException("User email not verified");
         }
 
-        refreshTokenRepository.deleteByUser(user);
-        String refreshTokenValue = UUID.randomUUID().toString();
-        RefreshToken refreshToken = RefreshToken.builder()
-                .token(refreshTokenValue)
-                .user(user)
-                .expiredAt(LocalDateTime.now().plusDays(7))
-                .build();
-
-        refreshTokenRepository.save(refreshToken);
-
-        String accessToken = jwtUtil.generateToken(user);
         return LoginResponseDTO.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshTokenValue)
-                .tokenType("Bearer")
                 .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
@@ -158,37 +134,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                 user.getPassword(),
                 List.of(new SimpleGrantedAuthority(user.getRole().name()))
         );
-    }
-
-    @Override
-    @Transactional
-    public RefreshTokenResponseDTO refreshToken(RefreshTokenRequestDTO request) {
-        RefreshToken storedToken=refreshTokenRepository.findByToken(request.getRefreshToken()).orElseThrow(() -> new AuthException("Invalid refresh token"));
-
-        if(LocalDateTime.now().isAfter(storedToken.getExpiredAt())){
-            refreshTokenRepository.delete(storedToken);
-            throw new AuthException("Refresh token expired. Please login again.");
-        }
-
-        User user = storedToken.getUser();
-
-        String newAccessToken = jwtUtil.generateToken(user);
-
-        refreshTokenRepository.delete(storedToken);
-
-        String newRefreshToken = UUID.randomUUID().toString();
-        RefreshToken refreshToken = RefreshToken.builder()
-                .token(newRefreshToken)
-                .user(user)
-                .expiredAt(LocalDateTime.now().plus(Duration.ofMillis(jwtUtil.getRefreshTokenExpiration())))
-                .build();
-        refreshTokenRepository.save(refreshToken);
-
-        return RefreshTokenResponseDTO.builder()
-                .token(newAccessToken)
-                .refreshToken(newRefreshToken)
-                .tokenType("Bearer")
-                .build();
     }
 
     @Override
@@ -227,7 +172,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         user.setOtpExpiresAt(null);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         authRepository.save(user);
-        refreshTokenRepository.deleteByUser(user);
     }
 
     @Override
@@ -238,20 +182,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             throw new AuthException("User is not authenticated");
         }
 
-        Object principal = authentication.getPrincipal();
-        String email;
-        if (principal instanceof UserDetails userDetails) {
-            email = userDetails.getUsername();
-        } else if (principal instanceof String username) {
-            email = username;
-        } else {
-            throw new AuthException("Invalid authenticated user");
-        }
-
-        User currentUser = authRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthException("User not found"));
-
-        refreshTokenRepository.deleteByUser(currentUser);
         SecurityContextHolder.clearContext();
     }
 }

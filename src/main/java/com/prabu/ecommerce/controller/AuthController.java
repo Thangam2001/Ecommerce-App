@@ -1,10 +1,8 @@
 package com.prabu.ecommerce.controller;
 
 import com.prabu.ecommerce.dto.requestdto.*;
-import com.prabu.ecommerce.dto.responsedto.RefreshTokenResponseDTO;
 import com.prabu.ecommerce.exception.AuthException;
 import com.prabu.ecommerce.service.AuthService;
-import com.prabu.ecommerce.utils.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request){
@@ -67,11 +64,6 @@ public class AuthController {
         } catch (AuthException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
-    }
-
-    @PostMapping("/refresh-token")
-    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO){
-        return ResponseEntity.ok(authService.refreshToken(refreshTokenRequestDTO));
     }
 
     @PostMapping("/forgot-password")

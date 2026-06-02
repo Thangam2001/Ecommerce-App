@@ -2,7 +2,6 @@ package com.prabu.ecommerce.service;
 
 import com.prabu.ecommerce.dto.requestdto.*;
 import com.prabu.ecommerce.dto.responsedto.LoginResponseDTO;
-import com.prabu.ecommerce.dto.responsedto.RefreshTokenResponseDTO;
 import com.prabu.ecommerce.model.User;
 import jakarta.validation.Valid;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,8 +15,6 @@ public interface AuthService {
     LoginResponseDTO login(@Valid LoginRequestDTO request);
 
     UserDetails loadUserByEmail(String email);
-
-    RefreshTokenResponseDTO refreshToken(@Valid RefreshTokenRequestDTO refreshTokenRequestDTO);
 
     void forgotPassword(@Valid ForgotPasswordRequestDTO request);
 
