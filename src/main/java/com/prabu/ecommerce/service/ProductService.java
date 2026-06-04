@@ -24,5 +24,5 @@ public interface ProductService {
 
     void uploadImages(Long id, List<MultipartFile> images);
 
-    void deleteImage(Long id, Long imgId);
+    void deleteProductImage(Long id, Long imgId);
 }

@@ -7,6 +7,7 @@ import com.prabu.ecommerce.exception.ProductException;
 import com.prabu.ecommerce.model.*;
 import com.prabu.ecommerce.repository.BrandRepository;
 import com.prabu.ecommerce.repository.CategoryRepository;
+import com.prabu.ecommerce.repository.ProductImageRepository;
 import com.prabu.ecommerce.repository.ProductRepository;
 import com.prabu.ecommerce.service.FileStorageService;
 import com.prabu.ecommerce.service.ProductService;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final FileStorageService fileStorageService;
     private final BrandRepository brandRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Override
     @Transactional
@@ -179,10 +180,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteImage(Long id, Long imgId) {
-        if(!productRepository.existsById(id)) {
-            throw new ProductException("Product not found with id: " + id);
-        }
+    @Transactional
+    public void deleteProductImage(Long productId, Long imgId) {
+        ProductImage image = productImageRepository.findByIdAndProductId(imgId, productId)
+                .orElseThrow(() -> new ProductException("Image not found for this product"));
 
+        fileStorageService.deleteFile(image.getImageUrl());
+
+        productImageRepository.delete(image);
+
+        if (image.getIsPrimary()) {
+            productRepository.findById(productId).ifPresent(product -> {
+                if (!product.getImages().isEmpty()) {
+                    ProductImage newPrimary = product.getImages().get(0);
+                    newPrimary.setIsPrimary(true);
+                    productImageRepository.save(newPrimary);
+                }
+            });
+        }
     }
 }

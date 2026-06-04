@@ -68,4 +68,10 @@ public class ProductController {
         productService.uploadImages(id, images);
         return ResponseEntity.ok(ApiResponse.success("Product images successfully uploaded."));
     }
+
+    @DeleteMapping("/admin/products/{id}/images/{imgId}")
+    public ResponseEntity<ApiResponse<String>> deleteProductImages(@PathVariable Long id, @PathVariable Long imgId) {
+        productService.deleteProductImage(id, imgId);
+        return ResponseEntity.ok(ApiResponse.success("Product images successfully deleted."));
+    }
 }
