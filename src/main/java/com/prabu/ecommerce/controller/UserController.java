@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,26 +19,18 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(Authentication authentication) {
-        try{
-            UserProfileResponse user=userService.getUserProfile(getAuthenticatedEmail(authentication));
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        }catch (UserException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UserProfileResponse> getProfile(Authentication authentication) {
+        UserProfileResponse user = userService.getUserProfile(getAuthenticatedEmail(authentication));
+        return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<?> updateUser(Authentication authentication, @Valid @RequestBody UserProfileUpdateRequestDTO request) {
-        try{
-            UserProfileResponse user = userService.updateProfile(
-                    getAuthenticatedEmail(authentication),
-                    request
-            );
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        }catch (UserException e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    @PutMapping("/profile")
+    public ResponseEntity<UserProfileResponse> updateUser(Authentication authentication, @Valid @RequestBody UserProfileUpdateRequestDTO request) {
+        UserProfileResponse user = userService.updateProfile(
+                getAuthenticatedEmail(authentication),
+                request
+        );
+        return ResponseEntity.ok(user);
     }
 
     private String getAuthenticatedEmail(Authentication authentication) {

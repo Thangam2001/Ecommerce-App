@@ -31,6 +31,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public User registerUser(RegisterRequestDTO request) {
         if (authRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new AuthException("Email already exist");
@@ -63,19 +64,18 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public boolean verifyOtp(VerifyEmailRequestDTO otpDetails) {
-        User userDetails=authRepository.findByEmail(otpDetails.getEmail()).get();
-        if(userDetails==null) {
-            throw new AuthException("User not found");
-        }
-        System.out.println(userDetails);
-        if(userDetails.isVerified()){
+        User userDetails = authRepository.findByEmail(otpDetails.getEmail())
+                .orElseThrow(() -> new AuthException("User not found"));
+
+        if (userDetails.isVerified()) {
             throw new AuthException("User is already verified");
         }
-        if(!userDetails.getOtp().equals(otpDetails.getOtp())) {
+        if (userDetails.getOtp() == null || !userDetails.getOtp().equals(otpDetails.getOtp())) {
             throw new AuthException("Invalid OTP");
         }
-        if(userDetails.getOtpExpiresAt().isBefore(LocalDateTime.now())) {
+        if (userDetails.getOtpExpiresAt() == null || userDetails.getOtpExpiresAt().isBefore(LocalDateTime.now())) {
             throw new AuthException("OTP expired");
         }
 
@@ -88,6 +88,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public void resendOtp(String email) {
         User user = authRepository.findByEmail(email).orElseThrow(() -> new AuthException("User not found"));
         String otp = String.format("%06d", ThreadLocalRandom.current().nextInt(100000, 1000000));
@@ -137,12 +138,10 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public void forgotPassword(ForgotPasswordRequestDTO request) {
-        User user=authRepository.findByEmail(request.getEmail()).get();
-
-        if(user==null) {
-            throw new AuthException("User not found");
-        }
+        User user = authRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthException("User not found"));
 
         String otp = String.format("%06d", ThreadLocalRandom.current().nextInt(100000, 1000000));
         user.setOtp(otp);
