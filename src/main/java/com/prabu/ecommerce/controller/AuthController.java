@@ -1,12 +1,11 @@
 package com.prabu.ecommerce.controller;
 
 import com.prabu.ecommerce.dto.requestdto.*;
-import com.prabu.ecommerce.exception.AuthException;
-import com.prabu.ecommerce.model.User;
+import com.prabu.ecommerce.dto.responsedto.ApiResponse;
+import com.prabu.ecommerce.dto.responsedto.LoginResponseDTO;
 import com.prabu.ecommerce.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,52 +20,44 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
-        User isRegistered = authService.registerUser(request);
-        if (isRegistered != null) {
-            return ResponseEntity.ok("Registration successful. OTP sent to " + isRegistered.getEmail());
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequestDTO request) {
+        var user = authService.registerUser(request);
+        return ResponseEntity.ok(ApiResponse.success("Registration successful. OTP sent to " + user.getEmail()));
     }
 
     @PostMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@Valid @RequestBody VerifyEmailRequestDTO otpDetails) {
-        boolean isVerified = authService.verifyOtp(otpDetails);
-        if (isVerified) {
-            return ResponseEntity.ok("Verification successful. Now you can login");
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ApiResponse<String>> verifyEmail(@Valid @RequestBody VerifyEmailRequestDTO otpDetails) {
+        authService.verifyOtp(otpDetails);
+        return ResponseEntity.ok(ApiResponse.success("Verification successful. Now you can login"));
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<String> resendOtp(@Valid @RequestBody ForgotPasswordRequestDTO request) {
+    public ResponseEntity<ApiResponse<String>> resendOtp(@Valid @RequestBody ForgotPasswordRequestDTO request) {
         authService.resendOtp(request.getEmail());
-        return ResponseEntity.ok("OTP resent to " + request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("OTP resent to " + request.getEmail()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request) {
+        LoginResponseDTO response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
         authService.forgotPassword(request);
-        return ResponseEntity.ok("Forgot Password successful. Check your email");
+        return ResponseEntity.ok(ApiResponse.success("OTP sent to your email for password reset"));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
+    public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
         authService.resetPassword(request);
-        return ResponseEntity.ok("Reset Password successful.");
+        return ResponseEntity.ok(ApiResponse.success("Reset Password successful."));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
+    public ResponseEntity<ApiResponse<String>> logout() {
         authService.logout();
-        return ResponseEntity.ok("Logout successful.");
+        return ResponseEntity.ok(ApiResponse.success("Logout successful."));
     }
-
 }

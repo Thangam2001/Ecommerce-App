@@ -1,6 +1,7 @@
 package com.prabu.ecommerce.controller;
 
 import com.prabu.ecommerce.dto.requestdto.UserProfileUpdateRequestDTO;
+import com.prabu.ecommerce.dto.responsedto.ApiResponse;
 import com.prabu.ecommerce.dto.responsedto.UserProfileResponse;
 import com.prabu.ecommerce.exception.UserException;
 import com.prabu.ecommerce.service.UserService;
@@ -19,18 +20,18 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponse> getProfile(Authentication authentication) {
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(Authentication authentication) {
         UserProfileResponse user = userService.getUserProfile(getAuthenticatedEmail(authentication));
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(ApiResponse.success("Profile fetched successfully", user));
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<UserProfileResponse> updateUser(Authentication authentication, @Valid @RequestBody UserProfileUpdateRequestDTO request) {
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateUser(Authentication authentication, @Valid @RequestBody UserProfileUpdateRequestDTO request) {
         UserProfileResponse user = userService.updateProfile(
                 getAuthenticatedEmail(authentication),
                 request
         );
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", user));
     }
 
     private String getAuthenticatedEmail(Authentication authentication) {

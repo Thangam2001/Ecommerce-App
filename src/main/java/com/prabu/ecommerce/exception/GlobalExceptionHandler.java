@@ -24,39 +24,36 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("message", "Validation failed");
         response.put("errors", errors);
+        response.put("timestamp", java.time.LocalDateTime.now());
 
         return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<Map<String, Object>> handleAuthException(AuthException exception) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("message", exception.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(ProductException.class)
     public ResponseEntity<Map<String, Object>> handleProductException(ProductException exception) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("message", exception.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<Map<String, Object>> handleUserException(UserException exception) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("message", exception.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception exception) {
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + exception.getMessage());
+    }
+
+    private ResponseEntity<Map<String, Object>> createErrorResponse(HttpStatus status, String message) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("message", "An unexpected error occurred: " + exception.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        response.put("status", status.value());
+        response.put("message", message);
+        response.put("timestamp", java.time.LocalDateTime.now());
+        return ResponseEntity.status(status).body(response);
     }
 }

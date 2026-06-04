@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -163,5 +164,25 @@ public class ProductServiceImpl implements ProductService {
                 .status(product.getStatus())
                 .images(imageDTOs)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void uploadImages(Long id, List<MultipartFile> images) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductException("Product not found with id: " + id));
+
+        if (images != null && !images.isEmpty()) {
+            saveImages(images, product);
+            productRepository.save(product);
+        }
+    }
+
+    @Override
+    public void deleteImage(Long id, Long imgId) {
+        if(!productRepository.existsById(id)) {
+            throw new ProductException("Product not found with id: " + id);
+        }
+
     }
 }

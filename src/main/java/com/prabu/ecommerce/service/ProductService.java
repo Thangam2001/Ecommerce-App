@@ -21,4 +21,8 @@ public interface ProductService {
     boolean toggleProductStatus(Long id);
 
     ProductResponseDTO convertToResponseDTO(Product product);
+
+    void uploadImages(Long id, List<MultipartFile> images);
+
+    void deleteImage(Long id, Long imgId);
 }

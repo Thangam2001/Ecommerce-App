@@ -2,6 +2,7 @@ package com.prabu.ecommerce.controller;
 
 import com.prabu.ecommerce.dto.requestdto.BrandRequestDTO;
 import com.prabu.ecommerce.dto.requestdto.CategoryRequestDTO;
+import com.prabu.ecommerce.dto.responsedto.ApiResponse;
 import com.prabu.ecommerce.dto.responsedto.ProductResponseDTO;
 import com.prabu.ecommerce.model.Brand;
 import com.prabu.ecommerce.model.Category;
@@ -23,56 +24,58 @@ public class CategoryController {
     // --- Category APIs ---
 
     @PostMapping("/admin/categories")
-    public ResponseEntity<String> addCategory(@Valid @RequestBody CategoryRequestDTO categoryRequest) {
+    public ResponseEntity<ApiResponse<String>> addCategory(@Valid @RequestBody CategoryRequestDTO categoryRequest) {
         categoryService.addCategory(categoryRequest);
-        return ResponseEntity.ok("Category added successfully");
+        return ResponseEntity.ok(ApiResponse.success("Category added successfully"));
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
+    public ResponseEntity<ApiResponse<List<Category>>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        return ResponseEntity.ok(ApiResponse.success("Categories fetched successfully", categories));
     }
 
     @GetMapping("/categories/{id}/products")
-    public ResponseEntity<List<ProductResponseDTO>> getProductsByCategory(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.getProductsByCategory(id));
+    public ResponseEntity<ApiResponse<List<ProductResponseDTO>>> getProductsByCategory(@PathVariable Long id) {
+        List<ProductResponseDTO> products = categoryService.getProductsByCategory(id);
+        return ResponseEntity.ok(ApiResponse.success("Products fetched successfully", products));
     }
 
     @PutMapping("/admin/categories/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryRequest) {
+    public ResponseEntity<ApiResponse<String>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryRequest) {
         categoryService.updateCategory(id, categoryRequest);
-        return ResponseEntity.ok("Category updated successfully");
+        return ResponseEntity.ok(ApiResponse.success("Category updated successfully"));
     }
 
     @DeleteMapping("/admin/categories/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Category deleted successfully");
+        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully"));
     }
 
     // --- Brand APIs ---
 
     @PostMapping("/admin/brands")
-    public ResponseEntity<String> addBrand(@Valid @RequestBody BrandRequestDTO brandRequest) {
+    public ResponseEntity<ApiResponse<String>> addBrand(@Valid @RequestBody BrandRequestDTO brandRequest) {
         categoryService.addBrand(brandRequest);
-        return ResponseEntity.ok("Brand added successfully");
+        return ResponseEntity.ok(ApiResponse.success("Brand added successfully"));
     }
 
     @GetMapping("/brands")
-    public ResponseEntity<List<Brand>> getAllBrands() {
-        return ResponseEntity.ok(categoryService.getAllBrands());
+    public ResponseEntity<ApiResponse<List<Brand>>> getAllBrands() {
+        List<Brand> brands = categoryService.getAllBrands();
+        return ResponseEntity.ok(ApiResponse.success("Brands fetched successfully", brands));
     }
 
     @PutMapping("/admin/brands/{id}")
-    public ResponseEntity<String> updateBrand(@PathVariable Long id, @Valid @RequestBody BrandRequestDTO brandRequest) {
+    public ResponseEntity<ApiResponse<String>> updateBrand(@PathVariable Long id, @Valid @RequestBody BrandRequestDTO brandRequest) {
         categoryService.updateBrand(id, brandRequest);
-        return ResponseEntity.ok("Brand updated successfully");
+        return ResponseEntity.ok(ApiResponse.success("Brand updated successfully"));
     }
 
     @DeleteMapping("/admin/brands/{id}")
-    public ResponseEntity<String> deleteBrand(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> deleteBrand(@PathVariable Long id) {
         categoryService.deleteBrand(id);
-        return ResponseEntity.ok("Brand deleted successfully");
+        return ResponseEntity.ok(ApiResponse.success("Brand deleted successfully"));
     }
 }
