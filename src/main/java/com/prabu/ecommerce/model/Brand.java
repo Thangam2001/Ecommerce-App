@@ -27,6 +27,8 @@ public class Brand {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String imageUrl;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

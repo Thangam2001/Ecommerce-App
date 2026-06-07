@@ -3,6 +3,7 @@ package com.prabu.ecommerce.repository;
 import com.prabu.ecommerce.model.Product;
 import com.prabu.ecommerce.model.ProductStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     boolean existsByBrandId(Long brandId);
 
     List<Product> findByStatus(ProductStatus status);
+
+    @Query("Select p from Product p where p.isFeatured=true and p.status=:status")
+    List<Product> findByIsFeaturedTrueAndStatus(ProductStatus status);
 }

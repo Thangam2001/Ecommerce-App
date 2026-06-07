@@ -26,4 +26,6 @@ public class ProductRequestDTO {
 
     @NotNull(message = "Brand is required")
     private Long brandId;
+
+    private boolean featured;
 }

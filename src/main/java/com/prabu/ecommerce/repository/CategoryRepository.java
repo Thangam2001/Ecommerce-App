@@ -13,7 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByName(String name);
 
     @Modifying
-    @Query("Update Category c set c.description=:description, c.name=:name where c.id=:id ")
-    void update(Long id, String name, String description);
+    @Query("Update Category c set c.description=:description, c.name=:name, c.imageUrl=:imageUrl where c.id=:id ")
+    void update(Long id, String name, String description, String imageUrl);
 
 }

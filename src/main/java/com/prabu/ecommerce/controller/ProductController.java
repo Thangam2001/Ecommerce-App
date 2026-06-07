@@ -34,6 +34,12 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success("Product fetched successfully", product));
     }
 
+    @GetMapping("/products/featured")
+    public ResponseEntity<ApiResponse<List<ProductResponseDTO>>> getFeaturedProducts() {
+        List<ProductResponseDTO> products = productService.getFeaturedProducts();
+        return ResponseEntity.ok(ApiResponse.success("Featured products fetched successfully", products));
+    }
+
     // --- Admin APIs ---
 
     @PostMapping(value = "/admin/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

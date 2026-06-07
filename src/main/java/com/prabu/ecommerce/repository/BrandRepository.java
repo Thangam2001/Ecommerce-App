@@ -11,6 +11,6 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
     Optional<Brand> findByName(String name);
 
     @Modifying
-    @Query("Update Brand b set b.description=:description, b.name=:name where b.id=:id ")
-    void update(Long id, String name, String description);
+    @Query("Update Brand b set b.description=:description, b.name=:name, b.imageUrl=:imageUrl where b.id=:id ")
+    void update(Long id, String name, String description, String imageUrl);
 }

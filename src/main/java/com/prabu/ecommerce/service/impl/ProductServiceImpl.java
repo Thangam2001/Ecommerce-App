@@ -53,6 +53,7 @@ public class ProductServiceImpl implements ProductService {
                 .status(ProductStatus.ACTIVE)
                 .category(category)
                 .brand(brand)
+                .isFeatured(request.isFeatured())
                 .build();
 
         if (images != null && !images.isEmpty()) {
@@ -101,6 +102,7 @@ public class ProductServiceImpl implements ProductService {
         product.setSku(request.getSku());
         product.setCategory(category);
         product.setBrand(brand);
+        product.setFeatured(request.isFeatured());
 
         if (images != null && !images.isEmpty()) {
             product.getImages().clear();
@@ -134,7 +136,7 @@ public class ProductServiceImpl implements ProductService {
     private void saveImages(List<MultipartFile> images, Product product) {
         boolean firstImage = product.getImages().isEmpty();
         for (MultipartFile image : images) {
-            String imageUrl = fileStorageService.saveFile(image);
+            String imageUrl = fileStorageService.saveFile(image, "products");
             ProductImage productImage = ProductImage.builder()
                     .imageUrl(imageUrl)
                     .isPrimary(firstImage)
@@ -199,4 +201,12 @@ public class ProductServiceImpl implements ProductService {
             });
         }
     }
+
+    @Override
+    public List<ProductResponseDTO> getFeaturedProducts() {
+        return productRepository.findByIsFeaturedTrueAndStatus(ProductStatus.ACTIVE).
+                stream().map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
 }
+

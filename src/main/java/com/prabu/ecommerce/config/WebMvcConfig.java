@@ -15,14 +15,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
             ResourceHandlerRegistry registry) {
 
         registry
-                .addResourceHandler("/uploads/products/**")
+                .addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadDir + "/");
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173")
+                .allowedOrigins("http://localhost:5174")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }

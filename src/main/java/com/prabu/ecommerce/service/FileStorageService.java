@@ -21,7 +21,7 @@ public class FileStorageService {
 
     private static final long MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
-    public String saveFile(MultipartFile file) {
+    public String saveFile(MultipartFile file, String subDir) {
 
         if (file.isEmpty()) {
             throw new RuntimeException("File is empty");
@@ -40,7 +40,7 @@ public class FileStorageService {
         }
 
         try {
-            Path uploadPath = Paths.get(uploadDir);
+            Path uploadPath = Paths.get(uploadDir, subDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -54,7 +54,7 @@ public class FileStorageService {
             Files.copy(file.getInputStream(), filePath,
                     StandardCopyOption.REPLACE_EXISTING);
 
-            return "/uploads/products/" + fileName;
+            return "/uploads/" + subDir + "/" + fileName;
 
         } catch (IOException e) {
             throw new RuntimeException(
@@ -64,11 +64,13 @@ public class FileStorageService {
     }
 
     public void deleteFile(String fileUrl) {
+        if (fileUrl == null || fileUrl.isEmpty()) return;
         try {
-            String fileName = fileUrl.replace(
-                    "/uploads/products/", ""
-            );
-            Path filePath = Paths.get(uploadDir).resolve(fileName);
+            // Remove leading slash if present for path resolution, but here we expect /uploads/subDir/filename
+            // The fileUrl is like /uploads/products/uuid.jpg
+            // uploadDir is uploads/
+            String relativePath = fileUrl.replaceFirst("^/uploads/", "");
+            Path filePath = Paths.get(uploadDir).resolve(relativePath);
             Files.deleteIfExists(filePath);
 
         } catch (IOException e) {

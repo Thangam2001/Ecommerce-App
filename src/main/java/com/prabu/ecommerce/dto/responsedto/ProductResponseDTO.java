@@ -21,5 +21,6 @@ public class ProductResponseDTO {
     private int stock;
     private String sku;
     private ProductStatus status;
+    private boolean featured;
     private List<ProductImageDTO> images;
 }

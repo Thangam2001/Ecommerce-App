@@ -9,8 +9,10 @@ import com.prabu.ecommerce.model.Category;
 import com.prabu.ecommerce.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,9 +25,10 @@ public class CategoryController {
 
     // --- Category APIs ---
 
-    @PostMapping("/admin/categories")
-    public ResponseEntity<ApiResponse<String>> addCategory(@Valid @RequestBody CategoryRequestDTO categoryRequest) {
-        categoryService.addCategory(categoryRequest);
+    @PostMapping(value = "/admin/categories", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<String>> addCategory(@Valid @RequestPart("category") CategoryRequestDTO categoryRequest,
+                                                           @RequestPart(value = "image", required = false) MultipartFile image) {
+        categoryService.addCategory(categoryRequest, image);
         return ResponseEntity.ok(ApiResponse.success("Category added successfully"));
     }
 
@@ -41,9 +44,11 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success("Products fetched successfully", products));
     }
 
-    @PutMapping("/admin/categories/{id}")
-    public ResponseEntity<ApiResponse<String>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryRequest) {
-        categoryService.updateCategory(id, categoryRequest);
+    @PutMapping(value = "/admin/categories/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<String>> updateCategory(@PathVariable Long id,
+                                                              @Valid @RequestPart("category") CategoryRequestDTO categoryRequest,
+                                                              @RequestPart(value = "image", required = false) MultipartFile image) {
+        categoryService.updateCategory(id, categoryRequest, image);
         return ResponseEntity.ok(ApiResponse.success("Category updated successfully"));
     }
 
@@ -55,9 +60,10 @@ public class CategoryController {
 
     // --- Brand APIs ---
 
-    @PostMapping("/admin/brands")
-    public ResponseEntity<ApiResponse<String>> addBrand(@Valid @RequestBody BrandRequestDTO brandRequest) {
-        categoryService.addBrand(brandRequest);
+    @PostMapping(value = "/admin/brands", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<String>> addBrand(@Valid @RequestPart("brand") BrandRequestDTO brandRequest,
+                                                        @RequestPart(value = "image", required = false) MultipartFile image) {
+        categoryService.addBrand(brandRequest, image);
         return ResponseEntity.ok(ApiResponse.success("Brand added successfully"));
     }
 
@@ -67,9 +73,11 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success("Brands fetched successfully", brands));
     }
 
-    @PutMapping("/admin/brands/{id}")
-    public ResponseEntity<ApiResponse<String>> updateBrand(@PathVariable Long id, @Valid @RequestBody BrandRequestDTO brandRequest) {
-        categoryService.updateBrand(id, brandRequest);
+    @PutMapping(value = "/admin/brands/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<String>> updateBrand(@PathVariable Long id,
+                                                           @Valid @RequestPart("brand") BrandRequestDTO brandRequest,
+                                                           @RequestPart(value = "image", required = false) MultipartFile image) {
+        categoryService.updateBrand(id, brandRequest, image);
         return ResponseEntity.ok(ApiResponse.success("Brand updated successfully"));
     }
 

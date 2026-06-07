@@ -25,4 +25,6 @@ public interface ProductService {
     void uploadImages(Long id, List<MultipartFile> images);
 
     void deleteProductImage(Long id, Long imgId);
+
+    List<ProductResponseDTO> getFeaturedProducts();
 }
